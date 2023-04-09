@@ -1,33 +1,42 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"io"
-	"net/http"
+	"github.com/Etherealsdu/crawler/collect"
+	"github.com/Etherealsdu/crawler/proxy"
+	"github.com/PuerkitoBio/goquery"
+	"time"
 )
 
 func main() {
-	url := "https://www.thepaper.cn/"
-	resp, err := http.Get(url)
-
+	proxyURLs := []string{"http://127.0.0.1:7890"}
+	p, err := proxy.RoundRobinProxySwitcher(proxyURLs...)
 	if err != nil {
-		fmt.Println("fetch url error:%v", err)
-		return
+		fmt.Println("RoundRobinProxySwitcher failed")
+	}
+	url := "https://google.com"
+	var f collect.Fetcher = collect.BrowserFetch{
+		Timeout: 3000 * time.Millisecond,
+		Proxy:   p,
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error status code:%v", resp.StatusCode)
+	body, err := f.Get(url)
+	if err != nil {
+		fmt.Printf("read content failed:%v\n", err)
 		return
 	}
+	fmt.Println(string(body))
 
-	body, err := io.ReadAll(resp.Body)
-
+	// 加载HTML文档
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
 		fmt.Println("read content failed:%v", err)
-		return
 	}
 
-	fmt.Println("body:", string(body))
+	doc.Find("div.news_li h2 a[target=_blank]").Each(func(i int, s *goquery.Selection) {
+		// 获取匹配元素的文本
+		title := s.Text()
+		fmt.Printf("Review %d: %s\n", i, title)
+	})
 }
