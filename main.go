@@ -31,7 +31,7 @@ func main() {
 	// 加载HTML文档
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
-		fmt.Println("read content failed:%v", err)
+		fmt.Printf("read content failed:%v\n", err)
 	}
 
 	doc.Find("div.news_li h2 a[target=_blank]").Each(func(i int, s *goquery.Selection) {
