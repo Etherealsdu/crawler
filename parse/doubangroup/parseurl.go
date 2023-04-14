@@ -1,7 +1,6 @@
 package doubangroup
 
 import (
-	"fmt"
 	"github.com/Etherealsdu/crawler/collect"
 	"regexp"
 )
@@ -12,7 +11,6 @@ func ParseURL(contents []byte, req *collect.Request) collect.ParseResult {
 	re := regexp.MustCompile(urlListRe)
 
 	matches := re.FindAllSubmatch(contents, -1)
-	fmt.Println(matches)
 	result := collect.ParseResult{}
 
 	for _, m := range matches {
